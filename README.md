@@ -87,6 +87,17 @@ basta cadastrar uma nova espécie.
 - A cliente demo já tem 2 pets (Thor, cachorro; Mia, gata) e 1 endereço.
 - Tudo fica salvo no aparelho. Para voltar ao estado inicial, limpe os dados do app (ou, na web, o armazenamento do site).
 
+### Testando cliente e loja juntos
+
+Como os dados ficam no próprio aparelho, dá para simular os dois lados:
+faça um pedido com `cliente@petgo.com`, saia, entre com `loja@petgo.com`
+(dona do *Pet Shop Amigo Fiel*) e aceite/prepare o pedido. Ao voltar para a
+conta do cliente, o status estará atualizado. Com o Firebase, isso passa a
+funcionar entre aparelhos diferentes, em tempo real.
+
+Uma loja nova cadastrada pelo app começa fechada e sem endereço; ela só aparece
+para os clientes depois que o dono preenche o endereço em **Minha loja**.
+
 ### Recomendações
 
 O produto "serve" para um pet quando bate a espécie, o porte e a fase da vida
@@ -102,7 +113,7 @@ O produto "serve" para um pet quando bate a espécie, o porte e a fase da vida
 
 - [x] **Fase 1: Base.** Tema visual, navegação por perfil, cadastro, login e logout (mock)
 - [x] **Fase 2: Compra (cliente).** Pets, endereços, home com recomendações, lojas e mapa, busca e filtros, produto, sacola, checkout, acompanhamento e histórico de pedidos
-- [ ] **Fase 3: Loja.** Painel de pedidos e cadastro de produtos
+- [x] **Fase 3: Loja.** Pedidos em tempo real (aceitar, recusar com motivo, separar, pronto), cadastro de produtos com foto e estoque, dados da loja e abrir/fechar
 - [ ] **Fase 4: Entregador.** Fluxo de entrega e rastreio no mapa
 - [ ] **Fase 5: Extras.** Chat, avaliações, cupons, favoritos, assinaturas, lembretes de ração e notificações
 - [ ] **Fase 6: Entrega.** Firebase, dados de exemplo e APK via EAS Build

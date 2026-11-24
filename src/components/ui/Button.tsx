@@ -1,4 +1,4 @@
-import { ActivityIndicator, Pressable, StyleSheet, Text, View, type ViewStyle } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { colors, font, radius, spacing } from '@/theme';
@@ -12,7 +12,7 @@ interface Props {
   icon?: keyof typeof Ionicons.glyphMap;
   loading?: boolean;
   disabled?: boolean;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
 }
 
 export function Button({ title, onPress, variant = 'primary', icon, loading, disabled, style }: Props) {

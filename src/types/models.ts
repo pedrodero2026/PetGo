@@ -130,6 +130,9 @@ export interface OrderItem {
 export interface Order {
   id: string;
   customerId: string;
+  /** Cópia do nome/telefone do cliente no momento do pedido, para a loja e o entregador */
+  customerName: string;
+  customerPhone?: string;
   storeId: string;
   courierId?: string;
   items: OrderItem[];
@@ -143,6 +146,7 @@ export interface Order {
   changeFor?: number;
   address: Address;
   status: OrderStatus;
+  cancelReason?: string;
   /** Data/hora em que cada status foi atingido */
   statusHistory: Partial<Record<OrderStatus, string>>;
   courierLocation?: { lat: number; lng: number; updatedAt: string };

@@ -2,6 +2,7 @@ import type {
   Address,
   Category,
   Order,
+  OrderStatus,
   PaymentMethod,
   Pet,
   Product,
@@ -83,6 +84,8 @@ export interface AddressService {
 
 export interface CreateOrderInput {
   customerId: string;
+  customerName: string;
+  customerPhone?: string;
   storeId: string;
   items: { productId: string; quantity: number }[];
   address: Address;
@@ -96,4 +99,22 @@ export interface OrderService {
   listByCustomer(customerId: string): Promise<Order[]>;
   /** Observa mudanças do pedido (status, entregador). Retorna função para parar. */
   subscribe(id: string, onChange: (order: Order) => void): () => void;
+  /** Lista e observa os pedidos de uma loja (chama onChange já com a lista inicial). */
+  subscribeByStore(storeId: string, onChange: (orders: Order[]) => void): () => void;
+  /** Muda o status respeitando o fluxo do pedido. Cancelar devolve o estoque. */
+  updateStatus(id: string, status: OrderStatus, extra?: { cancelReason?: string }): Promise<Order>;
+}
+
+// ---------- Gestão da loja (perfil loja) ----------
+
+export type ProductInput = Omit<Product, 'id' | 'rating' | 'ratingCount'> & {
+  id?: string;
+  rating?: number;
+  ratingCount?: number;
+};
+
+export interface StoreAdminService {
+  saveStore(store: Store): Promise<Store>;
+  saveProduct(product: ProductInput): Promise<Product>;
+  removeProduct(id: string): Promise<void>;
 }

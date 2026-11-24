@@ -48,6 +48,9 @@ export default function OrderScreen() {
         <View style={styles.flex}>
           <Text style={[styles.statusLabel, { color: info.color }]}>{info.label}</Text>
           <Text style={styles.muted}>{info.desc}</Text>
+          {order.status === 'cancelado' && !!order.cancelReason && (
+            <Text style={styles.cancelReason}>Motivo: {order.cancelReason}</Text>
+          )}
         </View>
       </View>
 
@@ -134,6 +137,7 @@ const styles = StyleSheet.create({
   },
   statusLabel: { fontSize: font.size.lg, fontWeight: font.weight.bold },
   muted: { color: colors.textMuted, fontSize: font.size.sm, lineHeight: 20 },
+  cancelReason: { color: colors.danger, fontSize: font.size.sm, fontWeight: font.weight.bold, marginTop: 2 },
   card: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing.md, gap: spacing.sm, ...shadow.card },
   step: { flexDirection: 'row', gap: spacing.md, minHeight: 40 },
   stepTrack: { alignItems: 'center', width: 16 },

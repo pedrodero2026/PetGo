@@ -19,7 +19,8 @@ export const mockCatalogService: CatalogService = {
   },
   async listStores() {
     await delay(250);
-    return storesDb.all();
+    // Lojas recém-cadastradas só aparecem para clientes depois de informar o endereço
+    return storesDb.where((s) => !!s.address.street);
   },
   getStore: (id) => storesDb.get(id),
   async listProducts(filter) {

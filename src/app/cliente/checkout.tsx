@@ -62,6 +62,8 @@ export default function Checkout() {
     try {
       const order = await orderService.create({
         customerId: user.id,
+        customerName: user.name,
+        customerPhone: user.phone,
         storeId: store.id,
         items: items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
         address,

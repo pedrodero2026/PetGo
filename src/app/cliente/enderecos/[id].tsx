@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { Stack, useLocalSearchParams } from 'expo-router';
 
 import { Button } from '@/components/ui/Button';
 import { Chip } from '@/components/ui/Chip';
@@ -12,25 +12,15 @@ import { addressService } from '@/services';
 import { useAuth } from '@/store/auth';
 import { colors, font, spacing } from '@/theme';
 import { confirm } from '@/utils/confirm';
+import { lookupCep } from '@/utils/cep';
 import { maskZip } from '@/utils/format';
 import type { Address } from '@/types/models';
+import { goBack } from '@/utils/navigation';
 
 const labels = ['Casa', 'Trabalho', 'Outro'];
 
 type Fields = { street: string; number: string; complement: string; district: string; city: string; state: string; zip: string };
 const empty: Fields = { street: '', number: '', complement: '', district: '', city: '', state: '', zip: '' };
-
-/** Busca o endereço pelo CEP na API pública ViaCEP. */
-async function lookupZip(zip: string): Promise<Partial<Fields> | null> {
-  try {
-    const res = await fetch(`https://viacep.com.br/ws/${zip.replace(/\D/g, '')}/json/`);
-    const json = await res.json();
-    if (json.erro) return null;
-    return { street: json.logradouro, district: json.bairro, city: json.localidade, state: json.uf };
-  } catch {
-    return null;
-  }
-}
 
 export default function AddressScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -57,7 +47,7 @@ function AddressForm({ id, isNew, data }: { id: string; isNew: boolean; data: Ad
     set('zip')(zip);
     if (zip.length === 9) {
       setSearching(true);
-      const found = await lookupZip(zip);
+      const found = await lookupCep(zip);
       setSearching(false);
       if (found) {
         setF((cur) => ({ ...cur, ...found, zip }));
@@ -96,13 +86,13 @@ function AddressForm({ id, isNew, data }: { id: string; isNew: boolean; data: Ad
       lat: data && data.zip === f.zip ? data.lat : undefined,
       lng: data && data.zip === f.zip ? data.lng : undefined,
     });
-    router.back();
+    goBack('/cliente/enderecos');
   }
 
   async function remove() {
     if (await confirm('Remover endereço', 'Deseja remover este endereço?', 'Remover')) {
       await addressService.remove(id);
-      router.back();
+      goBack('/cliente/enderecos');
     }
   }
 

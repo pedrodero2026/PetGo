@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { Stack, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -18,6 +18,7 @@ import type { Pet, PetSize, Species } from '@/types/models';
 import { confirm } from '@/utils/confirm';
 import { maskDate, parseBrDate, toBrDate } from '@/utils/format';
 import { sizeHints, sizeLabels } from '@/utils/pets';
+import { goBack } from '@/utils/navigation';
 
 /** Sugere o porte a partir do peso, para facilitar o preenchimento. */
 function sizeFromWeight(kg: number): PetSize {
@@ -100,13 +101,13 @@ function PetForm({ id, isNew, pet, species: speciesList }: FormProps) {
       birthDate,
       photoUrl,
     });
-    router.back();
+    goBack('/cliente/pets');
   }
 
   async function remove() {
     if (await confirm('Remover pet', `Deseja remover ${name}?`, 'Remover')) {
       await petService.remove(id);
-      router.back();
+      goBack('/cliente/pets');
     }
   }
 

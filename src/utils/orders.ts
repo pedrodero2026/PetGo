@@ -20,3 +20,28 @@ export const paymentLabels: Record<PaymentMethod, string> = {
   cartao: 'Cartão de crédito',
   dinheiro: 'Dinheiro na entrega',
 };
+
+/** Próximo passo que a loja pode dar em um pedido. */
+export function storeNextStep(status: OrderStatus): { status: OrderStatus; label: string } | undefined {
+  switch (status) {
+    case 'aguardando':
+      return { status: 'aceito', label: 'Aceitar pedido' };
+    case 'aceito':
+      return { status: 'preparando', label: 'Começar a separar' };
+    case 'preparando':
+      return { status: 'pronto', label: 'Pronto para entrega' };
+    default:
+      return undefined;
+  }
+}
+
+/** A loja ainda pode cancelar/recusar enquanto o pedido não saiu. */
+export const storeCanCancel = (s: OrderStatus) => s === 'aguardando' || s === 'aceito' || s === 'preparando';
+
+export const cancelReasons = [
+  'Produto sem estoque',
+  'Loja fechando',
+  'Endereço fora da área de entrega',
+  'Pedido duplicado',
+  'Outro motivo',
+];

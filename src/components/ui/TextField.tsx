@@ -24,6 +24,7 @@ export function TextField({ label, icon, error, hint, password, style, ...rest }
       <View
         style={[
           styles.field,
+          rest.multiline && styles.fieldMultiline,
           focused && { borderColor: colors.primary },
           !!error && { borderColor: colors.danger },
         ]}>
@@ -63,6 +64,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
   },
   // Na web o navegador desenha um contorno no foco; a borda laranja já indica o foco
+  fieldMultiline: { height: undefined, minHeight: 100, alignItems: 'flex-start', paddingVertical: spacing.sm },
   input: { flex: 1, fontSize: font.size.md, color: colors.text, height: '100%', ...noWebOutline },
   error: { fontSize: font.size.xs, color: colors.danger },
   hint: { fontSize: font.size.xs, color: colors.textMuted },

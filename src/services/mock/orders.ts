@@ -1,4 +1,4 @@
-import type { Order, OrderItem } from '@/types/models';
+import type { Order, OrderItem, OrderStatus } from '@/types/models';
 import { finalPrice } from '@/utils/products';
 import { ServiceError, type OrderService } from '../types';
 import { productsDb, storesDb } from './catalog';
@@ -6,6 +6,19 @@ import { collection } from './collection';
 import { delay } from './storage';
 
 export const ordersDb = collection<Order>('orders', []);
+
+/** Para quais status cada status pode avançar. */
+const transitions: Record<OrderStatus, OrderStatus[]> = {
+  aguardando: ['aceito', 'cancelado'],
+  aceito: ['preparando', 'cancelado'],
+  preparando: ['pronto', 'cancelado'],
+  pronto: ['a_caminho'],
+  a_caminho: ['entregue'],
+  entregue: [],
+  cancelado: [],
+};
+
+const newestFirst = (list: Order[]) => [...list].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 
 export const mockOrderService: OrderService = {
   async create(input) {
@@ -40,6 +53,8 @@ export const mockOrderService: OrderService = {
     return ordersDb.upsert(
       {
         customerId: input.customerId,
+        customerName: input.customerName,
+        customerPhone: input.customerPhone,
         storeId: store.id,
         items,
         subtotal,
@@ -61,8 +76,44 @@ export const mockOrderService: OrderService = {
   get: (id) => ordersDb.get(id),
 
   async listByCustomer(customerId) {
-    const list = await ordersDb.where((o) => o.customerId === customerId);
-    return list.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    return newestFirst(await ordersDb.where((o) => o.customerId === customerId));
+  },
+
+  subscribeByStore(storeId, onChange) {
+    let active = true;
+    const mine = (all: Order[]) => newestFirst(all.filter((o) => o.storeId === storeId));
+    ordersDb.all().then((all) => active && onChange(mine(all)));
+    const off = ordersDb.onChange((all) => onChange(mine(all)));
+    return () => {
+      active = false;
+      off();
+    };
+  },
+
+  async updateStatus(id, status, extra) {
+    await delay(300);
+    const order = await ordersDb.get(id);
+    if (!order) throw new ServiceError('Pedido não encontrado.');
+    if (!transitions[order.status].includes(status)) {
+      throw new ServiceError('Este pedido não pode mudar para esse status agora.');
+    }
+    if (status === 'cancelado') {
+      // Devolve os itens ao estoque
+      const products = await productsDb.all();
+      await productsDb.replaceAll(
+        products.map((p) => {
+          const item = order.items.find((i) => i.productId === p.id);
+          return item ? { ...p, stock: p.stock + item.quantity } : p;
+        }),
+      );
+    }
+    const now = new Date().toISOString();
+    return (await ordersDb.update(id, {
+      status,
+      cancelReason: extra?.cancelReason,
+      statusHistory: { ...order.statusHistory, [status]: now },
+      updatedAt: now,
+    }))!;
   },
 
   subscribe(id, onChange) {

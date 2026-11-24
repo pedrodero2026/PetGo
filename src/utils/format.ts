@@ -45,3 +45,23 @@ export function maskZip(text: string): string {
   const digits = text.replace(/\D/g, '').slice(0, 8);
   return digits.length > 5 ? `${digits.slice(0, 5)}-${digits.slice(5)}` : digits;
 }
+
+/** "agora", "há 5 min", "há 2 h", ou a data. */
+export function timeAgo(iso: string): string {
+  const min = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
+  if (min < 1) return 'agora';
+  if (min < 60) return `há ${min} min`;
+  if (min < 24 * 60) return `há ${Math.floor(min / 60)} h`;
+  return dateTimeLabel(iso);
+}
+
+/** Converte "12,50", "1.234,50" ou "12.5" em número (ou NaN). */
+export function parseMoney(text: string): number {
+  const t = text.trim();
+  return Number(t.includes(',') ? t.replace(/\./g, '').replace(',', '.') : t);
+}
+
+/** 12.5 -> "12,50" para preencher campos. */
+export function moneyInput(value?: number): string {
+  return value === undefined ? '' : value.toFixed(2).replace('.', ',');
+}

@@ -1,6 +1,7 @@
 import type { User } from '@/types/models';
 import { demoUsers } from '@/data/seed';
 import { AuthError, type AuthService, type RegisterInput } from '../types';
+import { storesDb } from './catalog';
 import { delay, newId, readJSON, remove, writeJSON } from './storage';
 
 const USERS_KEY = '@petgo/users';
@@ -64,6 +65,23 @@ export const mockAuthService: AuthService = {
       createdAt: new Date().toISOString(),
     };
     await writeJSON(USERS_KEY, [...users, user]);
+    if (user.role === 'loja' && user.storeId) {
+      // Cria a loja fechada e sem endereço; o dono completa os dados no painel
+      await storesDb.upsert({
+        id: user.storeId,
+        ownerId: user.id,
+        name: input.storeName?.trim() || user.name,
+        address: { street: '', number: '', district: '', city: '', state: '', zip: '' },
+        rating: 0,
+        ratingCount: 0,
+        deliveryFee: 5,
+        deliveryTimeMin: 30,
+        deliveryTimeMax: 50,
+        minOrder: 20,
+        isOpen: false,
+        speciesIds: ['cachorro', 'gato'],
+      });
+    }
     await writeJSON(SESSION_KEY, user.id);
     return strip(user);
   },
