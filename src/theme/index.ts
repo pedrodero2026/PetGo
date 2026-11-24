@@ -1,3 +1,5 @@
+import { Platform } from 'react-native';
+
 /**
  * Identidade visual do PetGo.
  * Todas as telas devem usar estes tokens em vez de cores/tamanhos soltos.
@@ -65,3 +67,9 @@ export const shadow = {
     elevation: 3,
   },
 } as const;
+
+/**
+ * Remove o anel de foco que o navegador desenha nos campos de texto (só web).
+ * A tipagem do React Native não aceita `outlineStyle: 'none'`, daí a conversão.
+ */
+export const noWebOutline = Platform.OS === 'web' ? ({ outlineStyle: 'none' } as object) : {};

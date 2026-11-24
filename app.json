@@ -34,6 +34,12 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "O PetGo usa suas fotos para você colocar a foto do seu pet."
+        }
       ]
     ],
     "experiments": {

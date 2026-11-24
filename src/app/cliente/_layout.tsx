@@ -1,18 +1,32 @@
-import { Tabs } from 'expo-router/js-tabs';
+import { Stack } from 'expo-router';
 
 import { RoleGuard } from '@/components/RoleGuard';
-import { tabIcon } from '@/components/TabIcon';
-import { tabScreenOptions } from '@/components/tabOptions';
+import { colors, font } from '@/theme';
 
 export default function ClienteLayout() {
   return (
     <RoleGuard role="cliente">
-      <Tabs screenOptions={tabScreenOptions}>
-        <Tabs.Screen name="index" options={{ title: 'Início', tabBarIcon: tabIcon('home') }} />
-        <Tabs.Screen name="buscar" options={{ title: 'Buscar', tabBarIcon: tabIcon('search') }} />
-        <Tabs.Screen name="pedidos" options={{ title: 'Pedidos', tabBarIcon: tabIcon('receipt') }} />
-        <Tabs.Screen name="perfil" options={{ title: 'Perfil', tabBarIcon: tabIcon('person') }} />
-      </Tabs>
+      <Stack
+        screenOptions={{
+          headerShadowVisible: false,
+          headerStyle: { backgroundColor: colors.background },
+          headerTintColor: colors.text,
+          headerTitleStyle: { fontWeight: font.weight.bold },
+          headerBackButtonDisplayMode: 'minimal',
+          contentStyle: { backgroundColor: colors.background },
+        }}>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="loja/[id]" options={{ title: '' }} />
+        <Stack.Screen name="produto/[id]" options={{ title: '' }} />
+        <Stack.Screen name="carrinho" options={{ title: 'Sacola' }} />
+        <Stack.Screen name="checkout" options={{ title: 'Finalizar pedido' }} />
+        <Stack.Screen name="pedido/[id]" options={{ title: 'Pedido' }} />
+        <Stack.Screen name="mapa" options={{ title: 'Lojas no mapa' }} />
+        <Stack.Screen name="pets/index" options={{ title: 'Meus pets' }} />
+        <Stack.Screen name="pets/[id]" options={{ title: 'Pet' }} />
+        <Stack.Screen name="enderecos/index" options={{ title: 'Endereços' }} />
+        <Stack.Screen name="enderecos/[id]" options={{ title: 'Endereço' }} />
+      </Stack>
     </RoleGuard>
   );
 }

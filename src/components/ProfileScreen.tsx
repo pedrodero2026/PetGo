@@ -1,4 +1,6 @@
-import { Alert, Platform, StyleSheet, Text, View } from 'react-native';
+import { Alert, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import type { Href } from 'expo-router';
+import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
 import { Button } from '@/components/ui/Button';
@@ -8,8 +10,14 @@ import { colors, font, radius, shadow, spacing } from '@/theme';
 
 const roleLabel = { cliente: 'Cliente', loja: 'Loja parceira', entregador: 'Entregador' } as const;
 
-/** Tela de perfil compartilhada pelos três perfis. */
-export function ProfileScreen() {
+export interface ProfileMenuItem {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  href: Href;
+}
+
+/** Tela de perfil compartilhada pelos três perfis. Cada perfil pode passar seus atalhos. */
+export function ProfileScreen({ menu = [] }: { menu?: ProfileMenuItem[] }) {
   const user = useAuth((s) => s.user);
   const logout = useAuth((s) => s.logout);
   if (!user) return null;
@@ -45,6 +53,21 @@ export function ProfileScreen() {
         {!!user.phone && <Info icon="call-outline" label="Telefone" value={user.phone} />}
         {user.vehicle && <Info icon="bicycle-outline" label="Veículo" value={user.vehicle} />}
       </View>
+
+      {menu.length > 0 && (
+        <View style={[styles.card, styles.menu]}>
+          {menu.map((m, i) => (
+            <Pressable
+              key={m.label}
+              onPress={() => router.push(m.href)}
+              style={[styles.menuItem, i > 0 && styles.menuDivider]}>
+              <Ionicons name={m.icon} size={22} color={colors.primary} />
+              <Text style={styles.menuLabel}>{m.label}</Text>
+              <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+            </Pressable>
+          ))}
+        </View>
+      )}
 
       <Button title="Sair da conta" variant="outline" icon="log-out-outline" onPress={confirmLogout} />
     </Screen>
@@ -85,5 +108,9 @@ const styles = StyleSheet.create({
   role: { textAlign: 'center', color: colors.textMuted, marginTop: -12 },
   info: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   infoLabel: { fontSize: font.size.xs, color: colors.textMuted },
-  infoValue: { fontSize: font.size.md, color: colors.text, textTransform: 'none' },
+  infoValue: { fontSize: font.size.md, color: colors.text },
+  menu: { paddingVertical: spacing.xs, gap: 0 },
+  menuItem: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingVertical: spacing.md },
+  menuDivider: { borderTopWidth: 1, borderTopColor: colors.border },
+  menuLabel: { flex: 1, fontSize: font.size.md, color: colors.text, fontWeight: font.weight.medium },
 });

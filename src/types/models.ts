@@ -58,6 +58,9 @@ export interface Address {
   isDefault?: boolean;
 }
 
+/** Endereço da loja: sem os campos que só fazem sentido para o cliente. */
+export type StoreAddress = Omit<Address, 'id' | 'userId' | 'label' | 'isDefault'>;
+
 export interface Store {
   id: string;
   ownerId: string;
@@ -65,7 +68,7 @@ export interface Store {
   logoUrl?: string;
   bannerUrl?: string;
   description?: string;
-  address: Omit<Address, 'id' | 'userId' | 'label'>;
+  address: StoreAddress;
   rating: number;
   ratingCount: number;
   deliveryFee: number;
@@ -136,8 +139,12 @@ export interface Order {
   total: number;
   couponCode?: string;
   paymentMethod: PaymentMethod;
+  /** Troco para (pagamento em dinheiro) */
+  changeFor?: number;
   address: Address;
   status: OrderStatus;
+  /** Data/hora em que cada status foi atingido */
+  statusHistory: Partial<Record<OrderStatus, string>>;
   courierLocation?: { lat: number; lng: number; updatedAt: string };
   createdAt: string;
   updatedAt: string;

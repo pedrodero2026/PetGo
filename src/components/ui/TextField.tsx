@@ -2,17 +2,19 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-import { colors, font, radius, spacing } from '@/theme';
+import { colors, font, noWebOutline, radius, spacing } from '@/theme';
 
 interface Props extends TextInputProps {
   label: string;
+  /** Texto de ajuda abaixo do campo */
+  hint?: string;
   icon?: keyof typeof Ionicons.glyphMap;
   error?: string;
   /** Mostra o botão de exibir/ocultar senha */
   password?: boolean;
 }
 
-export function TextField({ label, icon, error, password, style, ...rest }: Props) {
+export function TextField({ label, icon, error, hint, password, style, ...rest }: Props) {
   const [hidden, setHidden] = useState(true);
   const [focused, setFocused] = useState(false);
 
@@ -41,7 +43,7 @@ export function TextField({ label, icon, error, password, style, ...rest }: Prop
           </Pressable>
         )}
       </View>
-      {!!error && <Text style={styles.error}>{error}</Text>}
+      {error ? <Text style={styles.error}>{error}</Text> : !!hint && <Text style={styles.hint}>{hint}</Text>}
     </View>
   );
 }
@@ -60,6 +62,8 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     backgroundColor: colors.surface,
   },
-  input: { flex: 1, fontSize: font.size.md, color: colors.text, height: '100%' },
+  // Na web o navegador desenha um contorno no foco; a borda laranja já indica o foco
+  input: { flex: 1, fontSize: font.size.md, color: colors.text, height: '100%', ...noWebOutline },
   error: { fontSize: font.size.xs, color: colors.danger },
+  hint: { fontSize: font.size.xs, color: colors.textMuted },
 });

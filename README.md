@@ -15,8 +15,9 @@ Um único app com três perfis:
 
 - [Expo](https://expo.dev) SDK 58 + React Native + TypeScript
 - Expo Router (navegação por arquivos em `src/app/`)
-- Zustand (estado global)
+- Zustand (estado global, sacola persistida)
 - AsyncStorage (dados fictícios locais por enquanto)
+- react-native-maps (mapa das lojas) e expo-image-picker (foto do pet)
 - Firebase (Auth, Firestore, Storage, Cloud Messaging), a ser conectado
 
 ## Como rodar
@@ -57,12 +58,14 @@ src/
 │   ├── loja/             # Abas da loja
 │   └── entregador/       # Abas do entregador
 ├── components/           # Componentes reutilizáveis (ui/ = botões, campos, tela)
-├── data/seed.ts          # Dados fictícios (espécies, categorias, usuários demo)
+├── data/                 # Dados fictícios: seed.ts (espécies, categorias, usuários) e catalog.ts (lojas, produtos)
+├── hooks/                # useAsync (carregar dados), useAddToCart, useReorder...
 ├── services/             # Acesso a dados: interfaces + implementação mock
 │   ├── types.ts          # Contratos (AuthService, ...)
 │   ├── mock/             # Implementação local com AsyncStorage
 │   └── index.ts          # Escolhe a implementação (mock → firebase)
-├── store/                # Estado global (Zustand)
+├── store/                # Estado global (Zustand): auth e sacola
+├── utils/                # Formatação, filtros de produto, distância, regras dos pets
 ├── theme/                # Cores, espaçamentos e fontes do PetGo
 └── types/models.ts       # Modelos: User, Pet, Store, Product, Order...
 ```
@@ -77,10 +80,28 @@ uma linha em `services/index.ts`, sem mexer nas telas.
 Espécies também são dados (`data/seed.ts`), não código: para incluir pássaros, peixes etc.
 basta cadastrar uma nova espécie.
 
+## Dados fictícios
+
+- 5 pet shops em São Paulo (um deles fechado, para testar esse estado) e ~90 produtos em 5 categorias.
+- Marcas fictícias (NutriDog, FelinoPlus, VitaCão...).
+- A cliente demo já tem 2 pets (Thor, cachorro; Mia, gata) e 1 endereço.
+- Tudo fica salvo no aparelho. Para voltar ao estado inicial, limpe os dados do app (ou, na web, o armazenamento do site).
+
+### Recomendações
+
+O produto "serve" para um pet quando bate a espécie, o porte e a fase da vida
+(filhote < 1 ano; sênior a partir de 7 anos para cães e 10 para gatos). Veja `src/utils/pets.ts`.
+
+## Observações para o APK
+
+- O mapa no Android usa Google Maps: para o APK final é preciso uma chave da API do Google Maps
+  em `app.json` (`android.config.googleMaps.apiKey`). No Expo Go funciona sem chave.
+- Na versão web o mapa é substituído por um desenho simplificado (`StoresMap.web.tsx`).
+
 ## Roadmap
 
 - [x] **Fase 1: Base.** Tema visual, navegação por perfil, cadastro, login e logout (mock)
-- [ ] **Fase 2: Compra (cliente).** Pets, home, lojas, busca e filtros, produto, carrinho, checkout
+- [x] **Fase 2: Compra (cliente).** Pets, endereços, home com recomendações, lojas e mapa, busca e filtros, produto, sacola, checkout, acompanhamento e histórico de pedidos
 - [ ] **Fase 3: Loja.** Painel de pedidos e cadastro de produtos
 - [ ] **Fase 4: Entregador.** Fluxo de entrega e rastreio no mapa
 - [ ] **Fase 5: Extras.** Chat, avaliações, cupons, favoritos, assinaturas, lembretes de ração e notificações
