@@ -26,6 +26,12 @@ export default function ClienteLayout() {
         <Stack.Screen name="pets/[id]" options={{ title: 'Pet' }} />
         <Stack.Screen name="enderecos/index" options={{ title: 'Endereços' }} />
         <Stack.Screen name="enderecos/[id]" options={{ title: 'Endereço' }} />
+        <Stack.Screen name="favoritos" options={{ title: 'Favoritos' }} />
+        <Stack.Screen name="conversas" options={{ title: 'Conversas' }} />
+        <Stack.Screen name="chat/[storeId]" options={{ title: 'Conversa' }} />
+        <Stack.Screen name="avaliar/[orderId]" options={{ title: 'Avaliar pedido' }} />
+        <Stack.Screen name="assinar/[productId]" options={{ title: 'Assinar e receber sempre' }} />
+        <Stack.Screen name="assinaturas" options={{ title: 'Assinaturas' }} />
       </Stack>
     </RoleGuard>
   );

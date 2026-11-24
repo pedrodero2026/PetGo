@@ -40,6 +40,8 @@ export interface Pet {
   birthDate?: string;
   weightKg: number;
   photoUrl?: string;
+  /** Pacote de ração aberto informado pelo tutor (para o lembrete de recompra) */
+  foodPackage?: { kg: number; startedAt: string };
 }
 
 export interface Address {
@@ -165,20 +167,48 @@ export interface Subscription {
   customerId: string;
   storeId: string;
   productId: string;
+  productName: string;
+  categoryId: CategoryId;
   petId?: string;
   quantity: number;
   intervalDays: number;
   nextDeliveryDate: string;
   active: boolean;
+  paymentMethod: Exclude<PaymentMethod, 'dinheiro'>;
+  addressId: string;
+  lastOrderId?: string;
+  createdAt: string;
 }
 
 export interface Coupon {
+  id: string;
   code: string;
-  storeId?: string; // vazio = cupom do app
+  storeId?: string; // vazio = cupom do app (vale em qualquer loja)
   type: 'percent' | 'fixed' | 'frete_gratis';
   value: number;
   minOrder?: number;
   expiresAt?: string;
+  active: boolean;
+  description?: string;
+}
+
+export interface Favorite {
+  id: string;
+  userId: string;
+  type: 'product' | 'store';
+  targetId: string;
+}
+
+export interface Chat {
+  id: string; // `${customerId}_${storeId}`
+  customerId: string;
+  customerName: string;
+  storeId: string;
+  storeName: string;
+  lastMessage?: string;
+  lastAt?: string;
+  unreadByCustomer: number;
+  unreadByStore: number;
 }
 
 export interface Review {
@@ -190,6 +220,8 @@ export interface Review {
   orderId: string;
   rating: number;
   comment?: string;
+  /** Resposta da loja */
+  reply?: string;
   createdAt: string;
 }
 

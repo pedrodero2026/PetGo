@@ -10,7 +10,7 @@ import { SummaryRow as Row } from '@/components/ui/SummaryRow';
 import { EmptyState, Loading } from '@/components/ui/States';
 import { useAsync } from '@/hooks/useAsync';
 import { useReorder } from '@/hooks/useReorder';
-import { catalogService, orderService } from '@/services';
+import { catalogService, orderService, reviewService } from '@/services';
 import { colors, font, radius, shadow, spacing } from '@/theme';
 import type { Order } from '@/types/models';
 import { dateTimeLabel, money } from '@/utils/format';
@@ -21,8 +21,10 @@ export default function OrderScreen() {
   const reorder = useReorder();
   const { data, loading } = useAsync(async () => {
     const order = await orderService.get(id);
-    const store = order ? await catalogService.getStore(order.storeId) : null;
-    return { order, store };
+    const [store, review] = order
+      ? await Promise.all([catalogService.getStore(order.storeId), reviewService.getByOrder(order.id)])
+      : [null, null];
+    return { order, store, review };
   }, [id]);
 
   // Atualiza em tempo real quando a loja/entregador mudarem o status
@@ -116,9 +118,24 @@ export default function OrderScreen() {
         </Text>
       </View>
 
+      {order.status === 'entregue' &&
+        (data?.review ? (
+          <Text style={styles.reviewed}>
+            Você avaliou com {'★'.repeat(data.review.rating)}
+            {data.review.reply ? `\nResposta da loja: "${data.review.reply}"` : ''}
+          </Text>
+        ) : (
+          <Button title="Avaliar pedido" icon="star-outline" onPress={() => router.push(`/cliente/avaliar/${order.id}`)} />
+        ))}
       {!isActive(order.status) && (
-        <Button title="Pedir de novo" icon="refresh" onPress={() => reorder(order)} />
+        <Button title="Pedir de novo" variant="secondary" icon="refresh" onPress={() => reorder(order)} />
       )}
+      <Button
+        title="Falar com a loja"
+        variant="outline"
+        icon="chatbubbles-outline"
+        onPress={() => router.push(`/cliente/chat/${order.storeId}`)}
+      />
       <Button title="Voltar ao início" variant="ghost" onPress={() => router.replace('/cliente')} />
     </ScrollView>
   );
@@ -150,4 +167,5 @@ const styles = StyleSheet.create({
   storeRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginBottom: spacing.xs },
   bold: { fontWeight: font.weight.bold, color: colors.text },
   divider: { height: 1, backgroundColor: colors.border },
+  reviewed: { textAlign: 'center', color: colors.warning, fontWeight: font.weight.bold, lineHeight: 22 },
 });

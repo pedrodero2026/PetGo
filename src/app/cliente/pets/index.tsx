@@ -6,6 +6,7 @@ import { PetAvatar } from '@/components/PetAvatar';
 import { Button } from '@/components/ui/Button';
 import { EmptyState, Loading } from '@/components/ui/States';
 import { useAsync } from '@/hooks/useAsync';
+import { useFoodStatuses } from '@/hooks/useFoodStatuses';
 import { catalogService, petService } from '@/services';
 import { useAuth } from '@/store/auth';
 import { colors, font, radius, shadow, spacing } from '@/theme';
@@ -17,6 +18,8 @@ export default function Pets() {
     const [pets, species] = await Promise.all([petService.list(userId), catalogService.listSpecies()]);
     return { pets, species };
   }, [userId]);
+
+  const { statuses } = useFoodStatuses(userId);
 
   if (loading || !data) return <Loading />;
 
@@ -51,6 +54,7 @@ export default function Pets() {
                 {sizeLabels[pet.size]} · {String(pet.weightKg).replace('.', ',')} kg
                 {age ? ` · ${age}` : ''} · {lifeStageLabels[lifeStageOf(pet)]}
               </Text>
+              <FoodLine days={statuses.find((st) => st.pet.id === pet.id)?.daysLeft} />
             </View>
             <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
           </Pressable>
@@ -60,7 +64,20 @@ export default function Pets() {
   );
 }
 
+/** "Ração: ~7 dias restantes" (ou convite para informar o pacote). */
+function FoodLine({ days }: { days?: number }) {
+  if (days === undefined) return <Text style={styles.foodMuted}>Ração: informe o pacote para receber lembretes</Text>;
+  const color = days <= 3 ? colors.danger : days <= 10 ? colors.warning : colors.success;
+  return (
+    <Text style={[styles.food, { color }]}>
+      Ração: {days === 0 ? 'acabou' : `~${days} ${days === 1 ? 'dia restante' : 'dias restantes'}`}
+    </Text>
+  );
+}
+
 const styles = StyleSheet.create({
+  food: { fontSize: font.size.xs, fontWeight: font.weight.bold, marginTop: 2 },
+  foodMuted: { fontSize: font.size.xs, color: colors.textMuted, marginTop: 2 },
   flex: { flex: 1 },
   list: { padding: spacing.lg, gap: spacing.md, flexGrow: 1 },
   card: {

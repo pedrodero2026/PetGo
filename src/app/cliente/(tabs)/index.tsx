@@ -1,9 +1,10 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { FlatList, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { FoodReminderCard } from '@/components/FoodReminderCard';
 import { ProductCard } from '@/components/ProductCard';
 import { StoreCard } from '@/components/StoreCard';
 import { Chip } from '@/components/ui/Chip';
@@ -12,11 +13,14 @@ import { categories } from '@/data/seed';
 import { useAddToCart } from '@/hooks/useAddToCart';
 import { useAsync } from '@/hooks/useAsync';
 import { useCustomerLocation } from '@/hooks/useCustomerLocation';
-import { catalogService, petService } from '@/services';
+import { useFoodStatuses } from '@/hooks/useFoodStatuses';
+import { catalogService, petService, subscriptionService } from '@/services';
 import { useAuth } from '@/store/auth';
 import { cartCount, useCart } from '@/store/cart';
 import { colors, font, radius, shadow, spacing } from '@/theme';
+import { notify } from '@/utils/confirm';
 import { distanceKm } from '@/utils/geo';
+import { notifyNow } from '@/utils/notifications';
 import { productFitsPet } from '@/utils/pets';
 
 export default function Home() {
@@ -35,6 +39,20 @@ export default function Home() {
   }, [user.id]);
 
   const [petId, setPetId] = useState<string | undefined>();
+
+  // Lembretes de ração (e agendamento das notificações locais)
+  const { statuses } = useFoodStatuses(user.id, { schedule: true });
+  const reminders = statuses.filter((st) => st.daysLeft <= 10);
+
+  // Assinaturas vencidas viram pedidos ao abrir o app (no Firebase: Cloud Function diária)
+  useEffect(() => {
+    subscriptionService.processDue(user).then((created) => {
+      if (created.length === 0) return;
+      const msg = `${created.length} pedido(s) da sua assinatura foram enviados para a loja.`;
+      notify('Assinatura', msg);
+      notifyNow('Pedido da assinatura enviado 🐾', msg);
+    });
+  }, [user]);
 
   const view = useMemo(() => {
     if (!data) return undefined;
@@ -111,6 +129,15 @@ export default function Home() {
               <Chip label="Adicionar pet" icon="plus" onPress={() => router.push('/cliente/pets/novo')} />
             </ScrollView>
           </View>
+
+          {/* Lembretes de ração */}
+          {reminders.length > 0 && (
+            <View style={styles.block}>
+              {reminders.map((st) => (
+                <FoodReminderCard key={st.pet.id} status={st} />
+              ))}
+            </View>
+          )}
 
           {/* Categorias */}
           <View style={styles.categories}>

@@ -46,6 +46,12 @@
         {
           "locationWhenInUsePermission": "O PetGo usa sua localização durante as entregas para o cliente acompanhar o pedido."
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#FF7A00"
+        }
       ]
     ],
     "experiments": {

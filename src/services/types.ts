@@ -1,6 +1,11 @@
 import type {
   Address,
   Category,
+  Chat,
+  ChatMessage,
+  Coupon,
+  Favorite,
+  Subscription,
   Order,
   OrderStatus,
   PaymentMethod,
@@ -91,6 +96,7 @@ export interface CreateOrderInput {
   address: Address;
   paymentMethod: PaymentMethod;
   changeFor?: number;
+  couponCode?: string;
 }
 
 export interface OrderService {
@@ -133,4 +139,79 @@ export interface StoreAdminService {
   saveStore(store: Store): Promise<Store>;
   saveProduct(product: ProductInput): Promise<Product>;
   removeProduct(id: string): Promise<void>;
+}
+
+// ---------- Favoritos ----------
+
+export interface FavoriteService {
+  list(userId: string): Promise<Favorite[]>;
+  /** Liga/desliga o favorito. Retorna true se ficou favoritado. */
+  toggle(userId: string, type: Favorite['type'], targetId: string): Promise<boolean>;
+}
+
+// ---------- Avaliações ----------
+
+export interface ReviewInput {
+  orderId: string;
+  authorId: string;
+  authorName: string;
+  storeId: string;
+  storeRating: number;
+  comment?: string;
+  /** Nota de cada produto (opcional) */
+  productRatings: { productId: string; rating: number }[];
+}
+
+export interface ReviewService {
+  /** Cria a avaliação da loja (e dos produtos) e atualiza as médias. Uma por pedido. */
+  create(input: ReviewInput): Promise<void>;
+  getByOrder(orderId: string): Promise<Review | null>;
+  listByStore(storeId: string): Promise<Review[]>;
+  reply(reviewId: string, text: string): Promise<void>;
+}
+
+// ---------- Cupons ----------
+
+export interface CouponResult {
+  coupon: Coupon;
+  discount: number;
+}
+
+export interface CouponService {
+  /** Cupons ativos que valem para a loja (do app + da loja). */
+  listAvailable(storeId: string): Promise<Coupon[]>;
+  listByStore(storeId: string): Promise<Coupon[]>;
+  /** Valida o código e calcula o desconto. Lança ServiceError com o motivo se não valer. */
+  validate(code: string, storeId: string, subtotal: number, deliveryFee: number): Promise<CouponResult>;
+  save(coupon: Omit<Coupon, 'id'> & { id?: string }): Promise<Coupon>;
+  remove(id: string): Promise<void>;
+}
+
+// ---------- Chat cliente ⇄ loja ----------
+
+export interface ChatService {
+  /** Abre (ou cria) a conversa entre cliente e loja. */
+  open(customer: { id: string; name: string }, store: { id: string; name: string }): Promise<Chat>;
+  get(chatId: string): Promise<Chat | null>;
+  subscribeChats(filter: { customerId?: string; storeId?: string }, onChange: (chats: Chat[]) => void): () => void;
+  subscribeMessages(chatId: string, onChange: (messages: ChatMessage[]) => void): () => void;
+  send(chatId: string, senderId: string, text: string): Promise<void>;
+  markRead(chatId: string, by: 'customer' | 'store'): Promise<void>;
+}
+
+// ---------- Assinaturas (recompra automática) ----------
+
+export type SubscriptionInput = Omit<Subscription, 'id' | 'createdAt'> & { id?: string; createdAt?: string };
+
+export interface SubscriptionService {
+  list(customerId: string): Promise<Subscription[]>;
+  save(sub: SubscriptionInput): Promise<Subscription>;
+  remove(id: string): Promise<void>;
+  /**
+   * Gera os pedidos das assinaturas vencidas e agenda a próxima entrega.
+   * No Firebase isso vira uma Cloud Function diária; no mock roda ao abrir o app.
+   */
+  processDue(customer: Pick<User, 'id' | 'name' | 'phone'>): Promise<Order[]>;
+  /** Gera o pedido agora, sem esperar a data. */
+  orderNow(id: string, customer: Pick<User, 'id' | 'name' | 'phone'>): Promise<Order>;
 }

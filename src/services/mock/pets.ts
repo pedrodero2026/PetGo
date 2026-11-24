@@ -1,52 +1,12 @@
+import { demoAddresses, demoPets } from '@/data/demo';
 import type { Address, Pet } from '@/types/models';
 import { fakeGeocode } from '@/utils/geo';
 import type { AddressService, PetService } from '../types';
 import { collection } from './collection';
 import { delay } from './storage';
 
-const demoPets: Pet[] = [
-  {
-    id: 'pet_thor',
-    ownerId: 'user_cliente',
-    name: 'Thor',
-    speciesId: 'cachorro',
-    breed: 'Labrador',
-    size: 'grande',
-    weightKg: 30,
-    birthDate: '2022-03-10T00:00:00.000Z',
-  },
-  {
-    id: 'pet_mia',
-    ownerId: 'user_cliente',
-    name: 'Mia',
-    speciesId: 'gato',
-    breed: 'SRD',
-    size: 'pequeno',
-    weightKg: 4.2,
-    birthDate: '2026-05-01T00:00:00.000Z',
-  },
-];
-
-const demoAddresses: Address[] = [
-  {
-    id: 'addr_casa',
-    userId: 'user_cliente',
-    label: 'Casa',
-    street: 'Alameda Santos',
-    number: '1000',
-    complement: 'Apto 42',
-    district: 'Jardim Paulista',
-    city: 'São Paulo',
-    state: 'SP',
-    zip: '01418-100',
-    lat: -23.5651,
-    lng: -46.6543,
-    isDefault: true,
-  },
-];
-
 const petsDb = collection<Pet>('pets', demoPets);
-const addressesDb = collection<Address>('addresses', demoAddresses);
+export const addressesDb = collection<Address>('addresses', demoAddresses);
 
 export const mockPetService: PetService = {
   list: (ownerId) => petsDb.where((p) => p.ownerId === ownerId),

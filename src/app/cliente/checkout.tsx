@@ -9,7 +9,7 @@ import { SummaryRow as Row } from '@/components/ui/SummaryRow';
 import { Loading } from '@/components/ui/States';
 import { TextField } from '@/components/ui/TextField';
 import { useAsync } from '@/hooks/useAsync';
-import { addressService, catalogService, orderService } from '@/services';
+import { addressService, catalogService, couponService, orderService, type CouponResult } from '@/services';
 import { useAuth } from '@/store/auth';
 import { cartSubtotal, useCart } from '@/store/cart';
 import { colors, font, radius, spacing } from '@/theme';
@@ -32,22 +32,44 @@ export default function Checkout() {
   const [change, setChange] = useState('');
   const [error, setError] = useState('');
   const [placing, setPlacing] = useState(false);
+  const [couponCode, setCouponCode] = useState('');
+  const [coupon, setCoupon] = useState<CouponResult | undefined>();
+  const [couponError, setCouponError] = useState('');
+  const [checkingCoupon, setCheckingCoupon] = useState(false);
 
   const { data, loading } = useAsync(async () => {
     const [addresses, store] = await Promise.all([
       addressService.list(user.id),
       storeId ? catalogService.getStore(storeId) : null,
     ]);
-    return { addresses, store };
+    const coupons = storeId ? await couponService.listAvailable(storeId) : [];
+    return { addresses, store, coupons };
   }, [user.id, storeId]);
 
   if (loading || !data) return <Loading />;
-  const { addresses, store } = data;
+  const { addresses, store, coupons } = data;
   const address = addresses.find((a) => a.id === addressId) ?? addresses.find((a) => a.isDefault) ?? addresses[0];
 
   const subtotal = cartSubtotal(items);
   const fee = store?.deliveryFee ?? 0;
-  const total = subtotal + fee;
+  const discount = coupon?.discount ?? 0;
+  const total = Math.max(0, subtotal + fee - discount);
+
+  async function applyCoupon(code = couponCode) {
+    if (!store || !code.trim()) return;
+    setCheckingCoupon(true);
+    setCouponError('');
+    try {
+      const result = await couponService.validate(code, store.id, subtotal, fee);
+      setCoupon(result);
+      setCouponCode(result.coupon.code);
+    } catch (e) {
+      setCoupon(undefined);
+      setCouponError(e instanceof Error ? e.message : 'Cupom inválido.');
+    } finally {
+      setCheckingCoupon(false);
+    }
+  }
 
   async function placeOrder() {
     setError('');
@@ -69,6 +91,7 @@ export default function Checkout() {
         address,
         paymentMethod: method,
         changeFor,
+        couponCode: coupon?.coupon.code,
       });
       clear();
       router.dismissAll();
@@ -136,6 +159,48 @@ export default function Checkout() {
           />
         )}
 
+        {/* Cupom */}
+        <Text style={styles.section}>Cupom de desconto</Text>
+        {coupon ? (
+          <View style={[styles.option, styles.optionSelected]}>
+            <MaterialCommunityIcons name="ticket-percent" size={24} color={colors.success} />
+            <View style={styles.flex}>
+              <Text style={styles.optionTitle}>{coupon.coupon.code}</Text>
+              <Text style={[styles.optionDesc, { color: colors.success }]}>- {money(coupon.discount)}</Text>
+            </View>
+            <Pressable onPress={() => setCoupon(undefined)} hitSlop={8}>
+              <Text style={styles.remove}>Remover</Text>
+            </Pressable>
+          </View>
+        ) : (
+          <>
+            <View style={styles.couponRow}>
+              <View style={styles.flex}>
+                <TextField
+                  label="Código"
+                  icon="pricetag-outline"
+                  autoCapitalize="characters"
+                  placeholder="Ex.: PETGO10"
+                  value={couponCode}
+                  onChangeText={(t) => setCouponCode(t.toUpperCase())}
+                  error={couponError}
+                />
+              </View>
+              <Button title="Aplicar" variant="secondary" onPress={() => applyCoupon()} loading={checkingCoupon} style={styles.applyBtn} />
+            </View>
+            {coupons.length > 0 && (
+              <View style={styles.couponChips}>
+                {coupons.map((c) => (
+                  <Pressable key={c.id} style={styles.couponChip} onPress={() => applyCoupon(c.code)}>
+                    <Text style={styles.couponChipCode}>{c.code}</Text>
+                    {!!c.description && <Text style={styles.couponChipDesc}>{c.description}</Text>}
+                  </Pressable>
+                ))}
+              </View>
+            )}
+          </>
+        )}
+
         {/* Resumo */}
         <Text style={styles.section}>Resumo</Text>
         <View style={styles.summary}>
@@ -145,6 +210,7 @@ export default function Checkout() {
           <View style={styles.divider} />
           <Row label="Subtotal" value={money(subtotal)} />
           <Row label="Taxa de entrega" value={fee === 0 ? 'Grátis' : money(fee)} highlight={fee === 0} />
+          {discount > 0 && <Row label={`Cupom ${coupon!.coupon.code}`} value={`- ${money(discount)}`} highlight />}
           <Row label="Total" value={money(total)} bold />
         </View>
         {store && (
@@ -183,6 +249,20 @@ const styles = StyleSheet.create({
   simulated: { color: colors.textMuted, fontSize: font.size.xs },
   summary: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing.md, gap: spacing.sm },
   divider: { height: 1, backgroundColor: colors.border },
+  remove: { color: colors.danger, fontWeight: font.weight.bold },
+  couponRow: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm },
+  applyBtn: { marginTop: 22, height: 52 },
+  couponChips: { gap: spacing.xs },
+  couponChip: {
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    borderColor: colors.primary,
+    borderRadius: radius.md,
+    padding: spacing.sm,
+    backgroundColor: colors.primaryLight,
+  },
+  couponChipCode: { color: colors.primaryDark, fontWeight: font.weight.black },
+  couponChipDesc: { color: colors.primaryDark, fontSize: font.size.xs },
   eta: { color: colors.textMuted, textAlign: 'center', marginTop: spacing.sm },
   footer: { padding: spacing.lg, paddingBottom: spacing.md, gap: spacing.sm, borderTopWidth: 1, borderTopColor: colors.border },
   error: { color: colors.danger, textAlign: 'center' },

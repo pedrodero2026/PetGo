@@ -60,6 +60,8 @@ function PetForm({ id, isNew, pet, species: speciesList }: FormProps) {
   const [sizeTouched, setSizeTouched] = useState(!!pet);
   const [birth, setBirth] = useState(toBrDate(pet?.birthDate));
   const [photoUrl, setPhotoUrl] = useState<string | undefined>(pet?.photoUrl);
+  const [foodKg, setFoodKg] = useState(pet?.foodPackage ? String(pet.foodPackage.kg).replace('.', ',') : '');
+  const [foodDate, setFoodDate] = useState(toBrDate(pet?.foodPackage?.startedAt ?? new Date().toISOString()));
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
 
@@ -86,6 +88,10 @@ function PetForm({ id, isNew, pet, species: speciesList }: FormProps) {
     if (!(kg > 0 && kg < 150)) e.weight = 'Informe um peso válido.';
     const birthDate = birth ? parseBrDate(birth) : undefined;
     if (birth && !birthDate) e.birth = 'Data inválida. Use dd/mm/aaaa.';
+    const foodKgN = foodKg.trim() ? Number(foodKg.replace(',', '.')) : undefined;
+    const foodStart = foodKgN !== undefined ? parseBrDate(foodDate) : undefined;
+    if (foodKgN !== undefined && !(foodKgN > 0 && foodKgN <= 50)) e.foodKg = 'Peso inválido.';
+    if (foodKgN !== undefined && !foodStart) e.foodDate = 'Data inválida.';
     setErrors(e);
     if (Object.keys(e).length) return;
 
@@ -100,6 +106,7 @@ function PetForm({ id, isNew, pet, species: speciesList }: FormProps) {
       weightKg: kg,
       birthDate,
       photoUrl,
+      foodPackage: foodKgN !== undefined && foodStart ? { kg: foodKgN, startedAt: foodStart } : undefined,
     });
     goBack('/cliente/pets');
   }
@@ -183,6 +190,27 @@ function PetForm({ id, isNew, pet, species: speciesList }: FormProps) {
         Usamos espécie, porte, peso e idade para recomendar a ração certa e calcular quando ela vai acabar.
       </Text>
 
+      <Text style={styles.section}>Ração atual (opcional)</Text>
+      <Text style={styles.hint}>
+        Comprou ração fora do PetGo? Informe o pacote aberto para avisarmos quando estiver acabando. Compras feitas
+        pelo app são contadas automaticamente.
+      </Text>
+      <View style={styles.row}>
+        <View style={styles.flex}>
+          <TextField label="Pacote (kg)" keyboardType="decimal-pad" placeholder="Ex.: 15" value={foodKg} onChangeText={setFoodKg} error={errors.foodKg} />
+        </View>
+        <View style={styles.flex}>
+          <TextField
+            label="Aberto em"
+            keyboardType="number-pad"
+            placeholder="dd/mm/aaaa"
+            value={foodDate}
+            onChangeText={(t) => setFoodDate(maskDate(t))}
+            error={errors.foodDate}
+          />
+        </View>
+      </View>
+
       <Button title="Salvar" onPress={save} loading={saving} />
       {!isNew && <Button title="Remover pet" variant="ghost" onPress={remove} />}
     </Screen>
@@ -208,4 +236,7 @@ const styles = StyleSheet.create({
   label: { fontSize: font.size.sm, fontWeight: font.weight.medium, color: colors.text },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   hint: { color: colors.textMuted, fontSize: font.size.xs, lineHeight: 18 },
+  section: { fontSize: font.size.md, fontWeight: font.weight.bold, color: colors.text, marginTop: spacing.sm },
+  row: { flexDirection: 'row', gap: spacing.md },
+  flex: { flex: 1 },
 });

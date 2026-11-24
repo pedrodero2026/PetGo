@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { FavoriteButton } from '@/components/FavoriteButton';
 import { ProductImage } from '@/components/ProductImage';
 import { StoreAvatar } from '@/components/StoreCard';
 import { Button } from '@/components/ui/Button';
@@ -63,6 +64,7 @@ export default function ProductScreen() {
 
   return (
     <View style={styles.flex}>
+      <Stack.Screen options={{ headerRight: () => <FavoriteButton type="product" id={p.id} /> }} />
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.imageBox}>
           <ProductImage categoryId={p.categoryId} imageUrl={p.imageUrls[0]} size={220} />
@@ -106,6 +108,17 @@ export default function ProductScreen() {
             </Text>
           ))}
         </View>
+
+        {canBuy && (p.categoryId === 'racao' || p.categoryId === 'higiene') && (
+          <Pressable style={styles.subscribe} onPress={() => router.push(`/cliente/assinar/${p.id}`)}>
+            <MaterialCommunityIcons name="refresh-circle" size={30} color={colors.primary} />
+            <View style={styles.flex}>
+              <Text style={styles.subscribeTitle}>Assine e receba sempre</Text>
+              <Text style={styles.subscribeText}>Escolha de quanto em quanto tempo e nunca fique sem.</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={colors.primary} />
+          </Pressable>
+        )}
 
         <Text style={styles.section}>Descrição</Text>
         <Text style={styles.description}>{p.description}</Text>
@@ -202,6 +215,19 @@ const styles = StyleSheet.create({
   },
   rxText: { color: '#6A4BB3', flex: 1, fontSize: font.size.sm },
   tags: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
+  subscribe: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    padding: spacing.md,
+    borderRadius: radius.md,
+    borderWidth: 1.5,
+    borderColor: colors.primary,
+    backgroundColor: colors.primaryLight,
+    marginTop: spacing.sm,
+  },
+  subscribeTitle: { color: colors.primaryDark, fontWeight: font.weight.bold },
+  subscribeText: { color: colors.primaryDark, fontSize: font.size.xs },
   tag: {
     backgroundColor: colors.secondaryLight,
     color: colors.secondary,

@@ -18,6 +18,10 @@ export default function LojaLayout() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="pedido/[id]" options={{ title: 'Pedido' }} />
         <Stack.Screen name="produto/[id]" options={{ title: 'Produto' }} />
+        <Stack.Screen name="chat/[chatId]" options={{ title: 'Conversa' }} />
+        <Stack.Screen name="cupons" options={{ title: 'Cupons' }} />
+        <Stack.Screen name="cupom/[id]" options={{ title: 'Cupom' }} />
+        <Stack.Screen name="avaliacoes" options={{ title: 'Avaliações' }} />
       </Stack>
     </RoleGuard>
   );

@@ -17,7 +17,7 @@ Um único app com três perfis:
 - Expo Router (navegação por arquivos em `src/app/`)
 - Zustand (estado global, sacola persistida)
 - AsyncStorage (dados fictícios locais por enquanto)
-- react-native-maps (mapas), expo-location (GPS do entregador) e expo-image-picker (fotos)
+- react-native-maps (mapas), expo-location (GPS do entregador), expo-image-picker (fotos) e expo-notifications (lembretes)
 - Firebase (Auth, Firestore, Storage, Cloud Messaging), a ser conectado
 
 ## Como rodar
@@ -84,7 +84,10 @@ basta cadastrar uma nova espécie.
 
 - 5 pet shops em São Paulo (um deles fechado, para testar esse estado) e 80 produtos em 5 categorias.
 - Marcas fictícias (NutriDog, FelinoPlus, VitaCão...).
-- A cliente demo já tem 2 pets (Thor, cachorro; Mia, gata) e 1 endereço.
+- A cliente demo já tem 2 pets (Thor, cachorro; Mia, gata), 1 endereço e 1 pedido entregue há 30 dias
+  (a ração do Thor), que alimenta o lembrete de ração e pode ser avaliado.
+- Cupons de exemplo: `PETGO10` (10% acima de R$ 50), `FRETEGRATIS` (acima de R$ 80) e
+  `AMIGO15` (R$ 15 off no Pet Shop Amigo Fiel, acima de R$ 100).
 - Tudo fica salvo no aparelho. Para voltar ao estado inicial, limpe os dados do app (ou, na web, o armazenamento do site).
 
 ### Testando cliente e loja juntos
@@ -107,6 +110,21 @@ O rastreio tem dois modos, escolhidos na tela da entrega:
 Uma loja nova cadastrada pelo app começa fechada e sem endereço; ela só aparece
 para os clientes depois que o dono preenche o endereço em **Minha loja**.
 
+### Lembrete de ração
+
+O app estima quanto cada pet come por dia (energia de repouso `70 × peso^0,75` kcal ×
+fator da fase da vida, ÷ 3,6 kcal/g de ração seca) e, a partir do último pacote
+(comprado no app ou informado no cadastro do pet), calcula quando a ração acaba.
+A tela inicial mostra o aviso quando faltam 10 dias ou menos, e uma notificação local
+é agendada para 3 dias antes. É uma estimativa, não orientação veterinária.
+Veja `src/utils/food.ts`.
+
+### Assinaturas
+
+Na página de uma ração, **Assine e receba sempre** cria uma recompra automática com o
+intervalo sugerido pelo consumo do pet. Hoje os pedidos vencidos são gerados quando o
+cliente abre o app; com o Firebase isso vira uma Cloud Function diária.
+
 ### Recomendações
 
 O produto "serve" para um pet quando bate a espécie, o porte e a fase da vida
@@ -124,5 +142,5 @@ O produto "serve" para um pet quando bate a espécie, o porte e a fase da vida
 - [x] **Fase 2: Compra (cliente).** Pets, endereços, home com recomendações, lojas e mapa, busca e filtros, produto, sacola, checkout, acompanhamento e histórico de pedidos
 - [x] **Fase 3: Loja.** Pedidos em tempo real (aceitar, recusar com motivo, separar, pronto), cadastro de produtos com foto e estoque, dados da loja e abrir/fechar
 - [x] **Fase 4: Entregador.** Entregas disponíveis em tempo real, aceitar, retirar, rota no mapa, localização ao vivo (simulada ou GPS), código de entrega e ganhos
-- [ ] **Fase 5: Extras.** Chat, avaliações, cupons, favoritos, assinaturas, lembretes de ração e notificações
+- [x] **Fase 5: Extras.** Chat cliente ⇄ loja, avaliações com resposta da loja, cupons, favoritos, assinaturas de recompra, lembrete de ração com notificação local
 - [ ] **Fase 6: Entrega.** Firebase, dados de exemplo e APK via EAS Build

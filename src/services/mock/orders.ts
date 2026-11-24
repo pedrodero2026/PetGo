@@ -1,11 +1,13 @@
+import { demoOrders } from '@/data/demo';
 import type { Order, OrderItem, OrderStatus } from '@/types/models';
 import { finalPrice } from '@/utils/products';
 import { ServiceError, type OrderService } from '../types';
 import { productsDb, storesDb } from './catalog';
 import { collection } from './collection';
+import { validateCoupon } from './coupons';
 import { delay } from './storage';
 
-export const ordersDb = collection<Order>('orders', []);
+export const ordersDb = collection<Order>('orders', demoOrders);
 
 /** Para quais status cada status pode avançar. */
 const transitions: Record<OrderStatus, OrderStatus[]> = {
@@ -49,7 +51,10 @@ export const mockOrderService: OrderService = {
     );
 
     const now = new Date().toISOString();
-    const discount = 0; // cupons entram na Fase 5
+    // O desconto é recalculado aqui (não confiamos no valor vindo da tela)
+    const discount = input.couponCode
+      ? (await validateCoupon(input.couponCode, store.id, subtotal, store.deliveryFee)).discount
+      : 0;
     // O entregador recebe a taxa de entrega, com mínimo de R$ 5 (o app cobre a diferença no frete grátis)
     const courierFee = Math.max(store.deliveryFee, 5);
     const deliveryCode = String(Math.floor(1000 + Math.random() * 9000));
@@ -65,6 +70,7 @@ export const mockOrderService: OrderService = {
         subtotal,
         deliveryFee: store.deliveryFee,
         discount,
+        couponCode: input.couponCode?.trim().toUpperCase() || undefined,
         total: round(subtotal + store.deliveryFee - discount),
         paymentMethod: input.paymentMethod,
         changeFor: input.changeFor,

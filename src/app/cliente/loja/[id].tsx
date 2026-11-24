@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
 import { CartBar } from '@/components/CartBar';
+import { FavoriteButton } from '@/components/FavoriteButton';
 import { ProductCard } from '@/components/ProductCard';
 import { StoreAvatar } from '@/components/StoreCard';
+import { Button } from '@/components/ui/Button';
 import { Chip } from '@/components/ui/Chip';
 import { EmptyState, Loading } from '@/components/ui/States';
 import { categories } from '@/data/seed';
@@ -51,7 +53,7 @@ export default function StoreScreen() {
 
   return (
     <View style={styles.flex}>
-      <Stack.Screen options={{ title: store.name }} />
+      <Stack.Screen options={{ title: store.name, headerRight: () => <FavoriteButton type="store" id={store.id} /> }} />
       <ScrollView contentContainerStyle={styles.content} stickyHeaderIndices={[1]}>
         {/* Cabeçalho da loja */}
         <View style={styles.header}>
@@ -79,6 +81,12 @@ export default function StoreScreen() {
             <Info icon="cash-outline" label="Mínimo" value={money(store.minOrder)} />
             {km !== undefined && <Info icon="location-outline" label="Distância" value={distanceLabel(km)} />}
           </View>
+          <Button
+            title="Conversar com a loja"
+            variant="outline"
+            icon="chatbubbles-outline"
+            onPress={() => router.push(`/cliente/chat/${store.id}`)}
+          />
         </View>
 
         {/* Filtro por categoria (fica grudado no topo ao rolar) */}
