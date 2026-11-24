@@ -11,6 +11,17 @@ Um único app com três perfis:
 | **Loja** | Gerencia produtos, aceita pedidos, conversa com clientes, cria cupons |
 | **Entregador** | Aceita entregas, segue a rota e compartilha a localização em tempo real |
 
+## Telas
+
+<p>
+  <img src="docs/telas/2-cliente/01-inicio.png" width="200">
+  <img src="docs/telas/2-cliente/08-produto.png" width="200">
+  <img src="docs/telas/3-loja/01-pedidos-novos.png" width="200">
+  <img src="docs/telas/2-cliente/24-pedido-a-caminho-mapa.png" width="200">
+</p>
+
+Todas as telas (54), separadas por perfil, estão em **[docs/telas](docs/telas/README.md)**.
+
 ## Tecnologias
 
 - [Expo](https://expo.dev) SDK 58 + React Native + TypeScript
@@ -51,29 +62,32 @@ npx eslint .
 ## Estrutura
 
 ```
+docs/telas/              # Capturas de todas as telas, por perfil
 src/
-├── app/                  # Telas (cada arquivo é uma rota)
-│   ├── (auth)/           # Boas-vindas, login, cadastro
-│   ├── cliente/          # Abas do cliente
-│   ├── loja/             # Abas da loja
-│   └── entregador/       # Abas do entregador
-├── components/           # Componentes reutilizáveis (ui/ = botões, campos, tela)
-├── data/                 # Dados fictícios: seed.ts (espécies, categorias, usuários) e catalog.ts (lojas, produtos)
-├── hooks/                # useAsync (carregar dados), useAddToCart, useReorder...
-├── services/             # Acesso a dados: interfaces + implementação mock
-│   ├── types.ts          # Contratos (AuthService, ...)
-│   ├── mock/             # Implementação local com AsyncStorage
-│   └── index.ts          # Escolhe a implementação (mock → firebase)
-├── store/                # Estado global (Zustand): auth e sacola
-├── utils/                # Formatação, filtros de produto, distância, regras dos pets
-├── theme/                # Cores, espaçamentos e fontes do PetGo
-└── types/models.ts       # Modelos: User, Pet, Store, Product, Order...
+├── app/                 # Telas (cada arquivo é uma rota do Expo Router)
+│   ├── (auth)/          # Boas-vindas, login, cadastro
+│   ├── cliente/         # (tabs): início, buscar, pedidos, perfil + loja, produto, sacola,
+│   │                    #   checkout, pedido, pets, endereços, chat, assinaturas, favoritos...
+│   ├── loja/            # (tabs): pedidos, produtos, mensagens, minha loja, perfil
+│   │                    #   + detalhe do pedido, produto, chat, cupons, avaliações
+│   └── entregador/      # (tabs): entregas, ganhos, perfil + tela da entrega
+├── components/          # Componentes reutilizáveis (ui/ = botões, campos, chips, estrelas...)
+├── data/                # Dados fictícios: seed.ts, catalog.ts (lojas/produtos), demo.ts
+├── hooks/               # useAsync, pedidos em tempo real, rastreio, lembretes de ração...
+├── services/            # Acesso a dados
+│   ├── types.ts         # Contratos de todos os serviços
+│   ├── mock/            # Implementação local com AsyncStorage (atual)
+│   └── index.ts         # Escolhe a implementação (mock → firebase)
+├── store/               # Estado global (Zustand): login, sacola, favoritos
+├── theme/               # Cores, espaçamentos e fontes do PetGo
+├── types/models.ts      # Modelos: User, Pet, Store, Product, Order, Coupon, Chat...
+└── utils/               # Formatação, filtros, distância, consumo de ração, notificações
 ```
 
 ### Por que a camada `services/`?
 
-As telas nunca acessam o banco diretamente: chamam `authService` (e, nas próximas fases,
-`storeService`, `orderService`...). Hoje eles leem e gravam dados fictícios no aparelho.
+As telas nunca acessam o banco diretamente: chamam os serviços (`authService`, `catalogService`,
+`orderService`, `deliveryService`, `chatService`...). Hoje eles leem e gravam dados fictícios no aparelho.
 Para conectar o Firebase basta criar `services/firebase/` com as mesmas interfaces e trocar
 uma linha em `services/index.ts`, sem mexer nas telas.
 
