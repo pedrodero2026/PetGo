@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
+import { CustomerTracking } from '@/components/CustomerTracking';
 import { StoreAvatar } from '@/components/StoreCard';
 import { Button } from '@/components/ui/Button';
 import { SummaryRow as Row } from '@/components/ui/SummaryRow';
@@ -54,6 +55,9 @@ export default function OrderScreen() {
         </View>
       </View>
 
+      {/* Entregador e mapa ao vivo */}
+      {store && <CustomerTracking order={order} store={store} />}
+
       {/* Linha do tempo */}
       {order.status !== 'cancelado' && (
         <View style={styles.card}>
@@ -73,9 +77,6 @@ export default function OrderScreen() {
               </View>
             );
           })}
-          {order.status === 'a_caminho' && (
-            <Text style={styles.mapNote}>📍 O mapa com o entregador em tempo real chega na Fase 4.</Text>
-          )}
         </View>
       )}
 
@@ -146,7 +147,6 @@ const styles = StyleSheet.create({
   stepText: { flex: 1, flexDirection: 'row', justifyContent: 'space-between' },
   stepLabel: { fontWeight: font.weight.medium, color: colors.text },
   stepTime: { color: colors.textMuted, fontSize: font.size.xs },
-  mapNote: { color: colors.textMuted, fontSize: font.size.xs },
   storeRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginBottom: spacing.xs },
   bold: { fontWeight: font.weight.bold, color: colors.text },
   divider: { height: 1, backgroundColor: colors.border },

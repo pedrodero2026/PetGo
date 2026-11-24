@@ -105,6 +105,22 @@ export interface OrderService {
   updateStatus(id: string, status: OrderStatus, extra?: { cancelReason?: string }): Promise<Order>;
 }
 
+// ---------- Entregas (perfil entregador) ----------
+
+export interface DeliveryService {
+  /** Pedidos prontos ainda sem entregador (chama onChange já com a lista inicial). */
+  subscribeAvailable(onChange: (orders: Order[]) => void): () => void;
+  /** Entregas do entregador, em andamento e concluídas. */
+  subscribeByCourier(courierId: string, onChange: (orders: Order[]) => void): () => void;
+  /** Assume a entrega. Falha se outro entregador pegou antes ou se já há uma em andamento. */
+  accept(orderId: string, courier: Pick<User, 'id' | 'name' | 'vehicle'>): Promise<Order>;
+  /** Retirou na loja: o pedido sai para entrega. */
+  pickUp(orderId: string): Promise<Order>;
+  updateLocation(orderId: string, lat: number, lng: number): Promise<void>;
+  /** Confirma com o código que o cliente informa. */
+  confirmDelivery(orderId: string, code: string): Promise<Order>;
+}
+
 // ---------- Gestão da loja (perfil loja) ----------
 
 export type ProductInput = Omit<Product, 'id' | 'rating' | 'ratingCount'> & {

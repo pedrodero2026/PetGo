@@ -1,16 +1,23 @@
-import { Tabs } from 'expo-router/js-tabs';
+import { Stack } from 'expo-router';
 
 import { RoleGuard } from '@/components/RoleGuard';
-import { tabIcon } from '@/components/TabIcon';
-import { tabScreenOptions } from '@/components/tabOptions';
+import { colors, font } from '@/theme';
 
 export default function EntregadorLayout() {
   return (
     <RoleGuard role="entregador">
-      <Tabs screenOptions={tabScreenOptions}>
-        <Tabs.Screen name="index" options={{ title: 'Entregas', tabBarIcon: tabIcon('bicycle') }} />
-        <Tabs.Screen name="perfil" options={{ title: 'Perfil', tabBarIcon: tabIcon('person') }} />
-      </Tabs>
+      <Stack
+        screenOptions={{
+          headerShadowVisible: false,
+          headerStyle: { backgroundColor: colors.background },
+          headerTintColor: colors.text,
+          headerTitleStyle: { fontWeight: font.weight.bold },
+          headerBackButtonDisplayMode: 'minimal',
+          contentStyle: { backgroundColor: colors.background },
+        }}>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="entrega/[id]" options={{ title: 'Entrega' }} />
+      </Stack>
     </RoleGuard>
   );
 }

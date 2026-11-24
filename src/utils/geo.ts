@@ -30,3 +30,21 @@ export function fakeGeocode(zip: string): LatLng {
     lng: DEFAULT_LOCATION.lng + Math.cos(angle) * dist,
   };
 }
+
+/** Ponto entre `a` e `b` (t de 0 a 1). */
+export function interpolate(a: LatLng, b: LatLng, t: number): LatLng {
+  const k = Math.min(1, Math.max(0, t));
+  return { lat: a.lat + (b.lat - a.lat) * k, lng: a.lng + (b.lng - a.lng) * k };
+}
+
+/** Velocidade média em cidade (km/h) por veículo, para estimar a chegada. */
+const speedKmh = { moto: 25, bicicleta: 14, carro: 20 } as const;
+
+export function etaMinutes(km: number, vehicle: keyof typeof speedKmh = 'moto'): number {
+  return Math.max(1, Math.round((km / speedKmh[vehicle]) * 60));
+}
+
+/** Link para abrir a rota no app de mapas do celular (Google Maps). */
+export function directionsUrl(to: LatLng): string {
+  return `https://www.google.com/maps/dir/?api=1&destination=${to.lat},${to.lng}`;
+}

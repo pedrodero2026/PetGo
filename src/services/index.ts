@@ -6,6 +6,7 @@
  */
 import { mockAuthService } from './mock/auth';
 import { mockCatalogService } from './mock/catalog';
+import { mockDeliveryService } from './mock/delivery';
 import { mockOrderService } from './mock/orders';
 import { mockAddressService, mockPetService } from './mock/pets';
 import { mockStoreAdminService } from './mock/storeAdmin';
@@ -13,6 +14,7 @@ import type {
   AddressService,
   AuthService,
   CatalogService,
+  DeliveryService,
   OrderService,
   PetService,
   StoreAdminService,
@@ -24,5 +26,6 @@ export const petService: PetService = mockPetService;
 export const addressService: AddressService = mockAddressService;
 export const orderService: OrderService = mockOrderService;
 export const storeAdminService: StoreAdminService = mockStoreAdminService;
+export const deliveryService: DeliveryService = mockDeliveryService;
 
 export * from './types';

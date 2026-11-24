@@ -50,12 +50,17 @@ export const mockOrderService: OrderService = {
 
     const now = new Date().toISOString();
     const discount = 0; // cupons entram na Fase 5
+    // O entregador recebe a taxa de entrega, com mínimo de R$ 5 (o app cobre a diferença no frete grátis)
+    const courierFee = Math.max(store.deliveryFee, 5);
+    const deliveryCode = String(Math.floor(1000 + Math.random() * 9000));
     return ordersDb.upsert(
       {
         customerId: input.customerId,
         customerName: input.customerName,
         customerPhone: input.customerPhone,
         storeId: store.id,
+        courierFee,
+        deliveryCode,
         items,
         subtotal,
         deliveryFee: store.deliveryFee,

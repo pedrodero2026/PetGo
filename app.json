@@ -40,6 +40,12 @@
         {
           "photosPermission": "O PetGo usa suas fotos para você colocar a foto do seu pet."
         }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "O PetGo usa sua localização durante as entregas para o cliente acompanhar o pedido."
+        }
       ]
     ],
     "experiments": {

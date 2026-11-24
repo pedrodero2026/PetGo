@@ -135,6 +135,12 @@ export interface Order {
   customerPhone?: string;
   storeId: string;
   courierId?: string;
+  courierName?: string;
+  courierVehicle?: User['vehicle'];
+  /** Quanto o entregador recebe por esta entrega */
+  courierFee: number;
+  /** Código de 4 dígitos que o cliente informa ao entregador para confirmar a entrega */
+  deliveryCode: string;
   items: OrderItem[];
   subtotal: number;
   deliveryFee: number;

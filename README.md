@@ -17,7 +17,7 @@ Um único app com três perfis:
 - Expo Router (navegação por arquivos em `src/app/`)
 - Zustand (estado global, sacola persistida)
 - AsyncStorage (dados fictícios locais por enquanto)
-- react-native-maps (mapa das lojas) e expo-image-picker (foto do pet)
+- react-native-maps (mapas), expo-location (GPS do entregador) e expo-image-picker (fotos)
 - Firebase (Auth, Firestore, Storage, Cloud Messaging), a ser conectado
 
 ## Como rodar
@@ -95,6 +95,15 @@ faça um pedido com `cliente@petgo.com`, saia, entre com `loja@petgo.com`
 conta do cliente, o status estará atualizado. Com o Firebase, isso passa a
 funcionar entre aparelhos diferentes, em tempo real.
 
+Para a entrega, entre com `entregador@petgo.com` depois que a loja marcar o pedido
+como **pronto**: aceite, toque em **Retirei o pedido** e o entregador começa a andar
+no mapa. O cliente vê o mapa e o **código de entrega** (4 dígitos) na tela do pedido;
+o entregador digita esse código para concluir.
+
+O rastreio tem dois modos, escolhidos na tela da entrega:
+- **Simulado** (padrão, ideal para apresentar): o entregador vai da loja ao cliente em ~90 s.
+- **GPS do celular**: envia a localização real do aparelho a cada poucos segundos.
+
 Uma loja nova cadastrada pelo app começa fechada e sem endereço; ela só aparece
 para os clientes depois que o dono preenche o endereço em **Minha loja**.
 
@@ -114,6 +123,6 @@ O produto "serve" para um pet quando bate a espécie, o porte e a fase da vida
 - [x] **Fase 1: Base.** Tema visual, navegação por perfil, cadastro, login e logout (mock)
 - [x] **Fase 2: Compra (cliente).** Pets, endereços, home com recomendações, lojas e mapa, busca e filtros, produto, sacola, checkout, acompanhamento e histórico de pedidos
 - [x] **Fase 3: Loja.** Pedidos em tempo real (aceitar, recusar com motivo, separar, pronto), cadastro de produtos com foto e estoque, dados da loja e abrir/fechar
-- [ ] **Fase 4: Entregador.** Fluxo de entrega e rastreio no mapa
+- [x] **Fase 4: Entregador.** Entregas disponíveis em tempo real, aceitar, retirar, rota no mapa, localização ao vivo (simulada ou GPS), código de entrega e ganhos
 - [ ] **Fase 5: Extras.** Chat, avaliações, cupons, favoritos, assinaturas, lembretes de ração e notificações
 - [ ] **Fase 6: Entrega.** Firebase, dados de exemplo e APK via EAS Build
