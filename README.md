@@ -82,7 +82,7 @@ basta cadastrar uma nova espécie.
 
 ## Dados fictícios
 
-- 5 pet shops em São Paulo (um deles fechado, para testar esse estado) e ~90 produtos em 5 categorias.
+- 5 pet shops em São Paulo (um deles fechado, para testar esse estado) e 80 produtos em 5 categorias.
 - Marcas fictícias (NutriDog, FelinoPlus, VitaCão...).
 - A cliente demo já tem 2 pets (Thor, cachorro; Mia, gata) e 1 endereço.
 - Tudo fica salvo no aparelho. Para voltar ao estado inicial, limpe os dados do app (ou, na web, o armazenamento do site).
